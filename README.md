@@ -1,5 +1,13 @@
 # Quizly Game
 
+![React Native](https://img.shields.io/badge/React%20Native-0.81.5-61DAFB?logo=react&logoColor=white)
+![Expo](https://img.shields.io/badge/Expo-SDK%2054-000020?logo=expo&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES2022+-F7DF1E?logo=javascript&logoColor=black)
+![Platform](https://img.shields.io/badge/Platform-Android%20%7C%20iOS-34d399)
+![License](https://img.shields.io/badge/Licență-Academic-blue)
+![Status](https://img.shields.io/badge/Status-În%20dezvoltare-orange)
+
+
 O aplicație mobilă de quiz de cultură generală, construită cu React Native și Expo. Testează-ți cunoștințele în 7 categorii, urmărește-ți progresul cu XP și realizări, și provoacă-ți prietenii în modul 1v1 local.
 
 ## Funcționalități
