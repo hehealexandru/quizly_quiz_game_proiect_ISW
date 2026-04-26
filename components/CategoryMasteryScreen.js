@@ -69,3 +69,47 @@ function CategoryMasteryScreen({ language, onClose }) {
       </View>
     );
   }
+ if (selectedSummary) {
+    const unlockedCosmetics = selectedSummary.rewards.filter(
+      (reward) => reward.unlocked && reward.type !== "perk"
+    );
+    const nextReward = selectedSummary.rewards.find((r) => !r.unlocked);
+    return (
+      <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <Text style={styles.closeBtnText}>X</Text>
+        </TouchableOpacity>
+      </View>
+
+        <Text style={styles.detailsTitle}>{selectedSummary.label}</Text>
+        <Text style={styles.detailsLevel}>Lv {selectedSummary.level}</Text>
+        <Text style={styles.detailsXp}>
+          {selectedSummary.xp}/{selectedSummary.xpRequired} XP
+        </Text>
+        <MasteryProgressBar
+          xp={selectedSummary.xp}
+          xpRequired={selectedSummary.xpRequired}
+          color={theme.colors.gold}
+        />
+        <Text style={styles.nextRewardText}>
+          {nextReward
+            ? ${t(language, "nextReward")} Lv ${nextReward.level}
+            : t(language, "maxLevelReached")}
+        </Text>
+
+        <Text style={styles.sectionTitle}>{t(language, "rewardsTitle")}</Text>
+        <RewardTimeline language={language} rewards={selectedSummary.rewards} />
+
+        {unlockedCosmetics.length > 0 && (
+          <TouchableOpacity
+            style={styles.cosmeticsBtn}
+            onPress={() => setShowCosmetics((prev) => !prev)}
+          >
+            <Text style={styles.cosmeticsBtnText}>
+              {showCosmetics
+                ? t(language, "hideCosmetics")
+                : t(language, "viewCosmetics")}
+            </Text>
+          </TouchableOpacity>
+        )}
