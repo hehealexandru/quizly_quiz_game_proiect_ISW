@@ -134,3 +134,188 @@ function QuizScreen({
     setQuestions(finalQuestions);
     setLoading(false);
   }, [difficulty, category, language, gameMode]);
+
+  // Face tranzitia scorului mai lina in UI.
+  useEffect(() => {
+    if (displayScore === score) return;
+
+    const start = displayScore;
+    const end = score;
+    const duration = 400;
+    const steps = 20;
+    const stepTime = duration / steps;
+    let currentStep = 0;
+    const timer = setInterval(() => {
+      currentStep += 1;
+      const progress = currentStep / steps;
+      const value = Math.round(start + (end - start) * progress);
+      setDisplayScore(value);
+      if (currentStep >= steps) clearInterval(timer);
+    }, stepTime);
+
+    return () => clearInterval(timer);
+  }, [score, displayScore]);
+
+  // Da un mic pulse la streak cand creste.
+  useEffect(() => {
+    if (streak <= 0) return;
+
+    streakPulse.setValue(1);
+    Animated.sequence([
+      Animated.timing(streakPulse, {
+        toValue: 1.06,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+      Animated.timing(streakPulse, {
+        toValue: 1,
+        duration: 160,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [streak, streakPulse]);
+
+  // Ruleaza efectele audio pentru raspuns si final.
+  const playEffect = useCallback(async (type) => {
+    if (!soundEnabled) return;
+
+    try {
+      let soundFile;
+      if (type === "correct") soundFile = require("../assets/sounds/correct.mp3");
+      else if (type === "wrong") soundFile = require("../assets/sounds/wrong.mp3");
+      else if (type === "win") soundFile = require("../assets/sounds/win.mp3");
+
+      const { sound } = await Audio.Sound.createAsync(soundFile);
+      await sound.playAsync();
+      sound.setOnPlaybackStatusUpdate(async (status) => {
+        if (status.didJustFinish) {
+          await sound.unloadAsync();
+        }
+      });
+    } catch (_error) {
+    }
+  }, [soundEnabled]);
+
+  // Amesteca raspunsurile pentru fiecare intrebare.
+  function shuffle(items) {
+    return [...items].sort(() => Math.random() - 0.5);
+  }
+
+  // Trece la urmatoarea intrebare si reseteaza starea temporara.
+  const moveToNextQuestion = useCallback(() => {
+    const next = current + 1;
+    if (next < questions.length) {
+      setCurrent(next);
+      setAnswered(false);
+      setSelected(null);
+      setTimeLeft(15);
+      setDisabledAnswers([]);
+    }
+  }, [current, questions.length]);
+
+  // Proceseaza raspunsul, scorul, vietile si progresul secundar.
+  const handleAnswer = useCallback((answer) => {
+      if (disabledAnswers.includes(answer)) return;
+
+      setAnswered(true);
+      setSelected(answer);
+
+      const isCorrect = answer === questions[current]?.correct;
+      const activeCategory =
+        gameMode === "mega"
+          ? Number(questions[current]?.category)
+          : Number(category);
+      const activeDifficulty =
+        gameMode === "mega" ? questions[current]?.difficulty : difficulty;
+      const safeCategory = Number.isFinite(activeCategory)
+        ? activeCategory
+        : Number(category);
+      const safeDifficulty = activeDifficulty || difficulty;
+
+      if (isCorrect) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        playEffect("correct");
+        setStreak((previous) => previous + 1);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        playEffect("wrong");
+        setStreak(0);
+      }
+
+      let nextScore = score;
+      if (isCorrect) nextScore += 100;
+      else nextScore -= 50;
+      setScore(nextScore);
+
+      recordAnswer({
+        categoryId: safeCategory,
+        isCorrect,
+        difficulty: safeDifficulty,
+        mode: "single",
+      }).then(({ newUnlocks }) => {
+        if (newUnlocks.length > 0) {
+          showAchievementToast(language);
+          onAchievementsUnlocked && onAchievementsUnlocked();
+        }
+      });
+
+      recordMasteryAnswer({
+        categoryId: safeCategory,
+        isCorrect,
+        difficulty: safeDifficulty,
+        language,
+      }).then(({ levelUpInfo: masteryLevelUp, leveledUp }) => {
+        if (leveledUp && masteryLevelUp) {
+          setLevelUpInfo(masteryLevelUp);
+          setShowLevelUpModal(true);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          playEffect("win");
+        }
+      });
+
+      let currentLives = lives;
+      if (!isCorrect) {
+        currentLives -= 1;
+        setLives(currentLives);
+      }
+
+      if (currentLives <= 0) {
+        setTimeout(() => {
+          setShowReviveModal(true);
+        }, 1000);
+        return;
+      }
+
+      const isLastQuestion = current + 1 === questions.length;
+      if (isLastQuestion) {
+        playEffect("win");
+        setTimeout(() => {
+          onGameEnd &&
+            onGameEnd({
+              score: nextScore,
+              difficulty,
+              category,
+              mode: gameMode,
+              totalQuestions: questions.length,
+            });
+        }, 1500);
+      } else {
+        setTimeout(() => {
+          moveToNextQuestion();
+        }, 1500);
+      }
+  }, [
+    category,
+    current,
+    difficulty,
+    disabledAnswers,
+    gameMode,
+    language,
+    lives,
+    moveToNextQuestion,
+    onAchievementsUnlocked,
+    onGameEnd,
+    playEffect,
+    questions,
+    score,
+  ]);
