@@ -411,3 +411,174 @@ function QuizScreen({
         });
     }
   }
+
+  // Leaga butonul din modal de logica de revive.
+  function handlePressRevive() {
+    activateRevive();
+  }
+
+  // Inchide runda imediat daca jucatorul renunta.
+  function handleGiveUp() {
+    setShowReviveModal(false);
+    playEffect("wrong");
+    onGameEnd &&
+      onGameEnd({
+        score,
+        difficulty,
+        category,
+        mode: gameMode,
+        totalQuestions: questions.length,
+      });
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.accent} />
+      </View>
+    );
+  }
+
+  const currentQuestion = questions[current] || {};
+
+  return (
+    <View style={styles.wrapper}>
+      <View style={styles.headerBar}>
+        <Text style={styles.livesText}>
+          {t(language, "lives")}: {Array(lives).fill("❤️").join(" ")}
+        </Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.playerName}>{playerName}</Text>
+
+        <View style={styles.scoreTimer}>
+          <Text style={styles.timerText}>
+            {t(language, "time")}: {timeLeft}s
+          </Text>
+          <Text style={styles.scoreText}>
+            {t(language, "score")}: {displayScore}
+          </Text>
+        </View>
+
+        {streak > 0 && (
+          <View style={styles.streakPill}>
+            <Animated.Text
+              style={[styles.streakText, { transform: [{ scale: streakPulse }] }]}
+            >
+              {t(language, "streak")}: {streak}
+            </Animated.Text>
+          </View>
+        )}
+
+        <View style={styles.timeBar}>
+          <View
+            style={[
+              styles.timeFill,
+              {
+                width: `${(timeLeft / 15) * 100}%`,
+                backgroundColor:
+                  timeLeft <= 5 ? theme.colors.danger : theme.colors.accent,
+              },
+            ]}
+          />
+        </View>
+
+        <Text style={styles.questionText}>{currentQuestion.question}</Text>
+
+        <View style={styles.powerups}>
+          <TouchableOpacity
+            style={[styles.powerBtn, fiftyUsed && styles.powerBtnUsed]}
+            onPress={handlePressFifty}
+            disabled={fiftyUsed || answered}
+          >
+            <Text style={styles.powerBtnText}>{t(language, "powerFifty")}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.powerBtn, skipUsed && styles.powerBtnUsed]}
+            onPress={handlePressSkip}
+            disabled={skipUsed || answered}
+          >
+            <Text style={styles.powerBtnText}>{t(language, "powerSkip")}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.answers}>
+          {currentQuestion.answers?.map((answer, index) => {
+            const isCorrect = answer === currentQuestion.correct;
+            const isSelected = answer === selected;
+            const isDisabled = disabledAnswers.includes(answer);
+
+            const buttonStyle = [styles.answerBtn];
+            if (isDisabled) buttonStyle.push(styles.answerBtnDisabled);
+            if (answered && isCorrect) buttonStyle.push(styles.answerBtnCorrect);
+            else if (answered && isSelected && !isCorrect) {
+              buttonStyle.push(styles.answerBtnWrong);
+            }
+
+            return (
+              <TouchableOpacity
+                key={index}
+                style={buttonStyle}
+                disabled={isDisabled}
+                onPress={() => !answered && handleAnswer(answer)}
+              >
+                <Text style={styles.answerText}>{answer}</Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
+        <Text style={styles.progressText}>
+          {t(language, "questionProgress")} {current + 1} / {questions.length}
+        </Text>
+      </View>
+
+      <Modal visible={showReviveModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>💔 {t(language, "ohNo")} 💔</Text>
+            <Text style={styles.modalText}>{t(language, "outOfLives")}</Text>
+            <Text style={styles.modalSubText}>{t(language, "revivePrompt")}</Text>
+
+            <TouchableOpacity style={styles.reviveBtn} onPress={handlePressRevive}>
+              <Text style={styles.reviveBtnText}>{t(language, "reviveBtn")}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.giveUpBtn} onPress={handleGiveUp}>
+              <Text style={styles.giveUpBtnText}>{t(language, "giveUp")}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={showLevelUpModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <Animated.View
+            style={[
+              styles.levelUpModal,
+              { opacity: levelUpOpacity, transform: [{ scale: levelUpScale }] },
+            ]}
+          >
+            <Text style={styles.levelUpTitle}>{t(language, "levelUpTitle")}</Text>
+            <Text style={styles.levelUpSubtitle}>Lv {levelUpInfo?.level}</Text>
+
+            {levelUpInfo?.reward && (
+              <Text style={styles.levelUpReward}>{levelUpInfo.reward.label}</Text>
+            )}
+
+            {levelUpInfo?.canEquip && levelUpInfo?.reward && (
+              <TouchableOpacity
+                style={styles.equipBtn}
+                onPress={async () => {
+                  await equipReward({
+                    categoryId: Number(category),
+                    rewardId: levelUpInfo.reward.id,
+                  });
+                  setShowLevelUpModal(false);
+                }}
+              >
+                <Text style={styles.equipBtnText}>{t(language, "equipNow")}</Text>
+              </TouchableOpacity>
+            )}
