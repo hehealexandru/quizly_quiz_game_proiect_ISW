@@ -113,3 +113,56 @@ function CategoryMasteryScreen({ language, onClose }) {
             </Text>
           </TouchableOpacity>
         )}
+        {showCosmetics && unlockedCosmetics.length > 0 && (
+          <View style={styles.cosmeticsList}>
+            {unlockedCosmetics.map((reward) => (
+              <Text key={reward.id} style={styles.cosmeticItem}>
+                {reward.label}
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
+    );
+  }
+
+  const topCategories = getTopCategories({ language, state });
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.headerRow}>
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <Text style={styles.closeBtnText}>X</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>{t(language, "masteryTitle")}</Text>
+        <View style={{ width: 44 }} />
+      </View>
+
+      <View style={styles.topSection}>
+        <Text style={styles.sectionTitle}>{t(language, "topCategories")}</Text>
+        <View style={styles.topList}>
+          {topCategories.map((item) => (
+            <View key={item.categoryId} style={styles.topItem}>
+              <Text style={styles.topLabel}>{item.label}</Text>
+              <Text style={styles.topValue}>Lv {item.level}</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      <ScrollView contentContainerStyle={styles.list}>
+        {summaries.map((summary) => (
+          <CategoryCard
+            key={summary.categoryId}
+            language={language}
+            summary={summary}
+            onPress={() => {
+              setShowCosmetics(false);
+              setSelectedCategoryId(summary.categoryId);
+            }}
+          />
+        ))}
+      </ScrollView>
+    </View>
+  );
+}
