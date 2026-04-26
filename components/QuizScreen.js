@@ -319,3 +319,95 @@ function QuizScreen({
     questions,
     score,
   ]);
+
+  // Scade timerul doar cand jocul este activ.
+  useEffect(() => {
+    if (loading || answered || showReviveModal || showLevelUpModal) return;
+
+    if (timeLeft === 0) {
+      handleAnswer(null);
+      return;
+    }
+
+    const timer = setTimeout(() => setTimeLeft((value) => value - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [timeLeft, answered, loading, handleAnswer, showReviveModal, showLevelUpModal]);
+
+  // Dezactiveaza doua raspunsuri gresite.
+  function activateFifty() {
+    setFiftyUsed(true);
+
+    const currentQuestion = questions[current];
+    if (!currentQuestion?.answers) return;
+
+    const wrongAnswers = currentQuestion.answers.filter(
+      (answer) => answer !== currentQuestion.correct
+    );
+    const answersToDisable = wrongAnswers
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 2);
+    setDisabledAnswers(answersToDisable);
+  }
+
+  // Blocheaza reutilizarea butonului 50/50.
+  function handlePressFifty() {
+    if (fiftyUsed || answered) return;
+    activateFifty();
+  }
+
+  // Sari peste intrebare si ofera punctele standard.
+  function activateSkip() {
+    const nextScore = score + 100;
+
+    setSkipUsed(true);
+    setAnswered(true);
+    setSelected("SKIPPED");
+    setScore(nextScore);
+    playEffect("correct");
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    setTimeout(() => {
+      const next = current + 1;
+      if (next < questions.length) {
+        moveToNextQuestion();
+      } else {
+        playEffect("win");
+        onGameEnd &&
+          onGameEnd({
+            score: nextScore,
+            difficulty,
+            category,
+            mode: gameMode,
+            totalQuestions: questions.length,
+          });
+      }
+    }, 1200);
+  }
+
+  // Blocheaza reutilizarea butonului skip.
+  function handlePressSkip() {
+    if (skipUsed || answered) return;
+    activateSkip();
+  }
+
+  // Continua jocul cu o singura viata.
+  function activateRevive() {
+    setLives(1);
+    setShowReviveModal(false);
+    playEffect("correct");
+
+    const next = current + 1;
+    if (next < questions.length) {
+      moveToNextQuestion();
+    } else {
+      playEffect("win");
+      onGameEnd &&
+        onGameEnd({
+          score,
+          difficulty,
+          category,
+          mode: gameMode,
+          totalQuestions: questions.length,
+        });
+    }
+  }
