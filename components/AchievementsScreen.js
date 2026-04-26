@@ -78,3 +78,127 @@ function AchievementsScreen({ language, onClose, onViewed }) {
       onViewed && onViewed();
     });
   }, [data, onViewed]);
+
+  // Pune cele mai relevante realizari primele in lista.
+  function sortAchievements(list) {
+    return [...list].sort((a, b) => {
+      const statusOrder = { in_progress: 0, completed: 1 };
+      const statusDiff =
+        statusOrder[getDisplayStatus(a.status)] -
+        statusOrder[getDisplayStatus(b.status)];
+      if (statusDiff !== 0) return statusDiff;
+      const remainingA = a.threshold - a.progress;
+      const remainingB = b.threshold - b.progress;
+      return remainingA - remainingB;
+    });
+  }
+
+  // Deschide sau inchide o categorie din lista.
+  function toggleCategory(categoryId) {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoryId]: !prev?.[categoryId],
+    }));
+  }
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.backBtn} onPress={onClose}>
+          <Text style={styles.backBtnText}>X</Text>
+        </TouchableOpacity>
+        <View style={styles.headerText}>
+          <Text style={styles.title}>{t(language, "achievementsTitle")}</Text>
+          <Text style={styles.subtitle}>{t(language, "achievementsSubtitle")}</Text>
+        </View>
+        <View style={{ width: 44 }} />
+      </View>
+
+      <View style={styles.filters}>
+        {FILTERS.map((f) => {
+          const labelKey =
+            f === "all"
+              ? "filterAll"
+              : f === "completed"
+                ? "filterCompleted"
+                : "filterInProgress";
+          const selected = filter === f;
+          return (
+            <TouchableOpacity
+              key={f}
+              style={[styles.filterBtn, selected && styles.filterBtnSelected]}
+              onPress={() => setFilter(f)}
+            >
+              <Text
+                style={[
+                  styles.filterText,
+                  selected && styles.filterTextSelected,
+                ]}
+              >
+                {t(language, labelKey)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.section}>
+          <TouchableOpacity
+            style={styles.categoryHeader}
+            onPress={() => setGlobalExpanded((prev) => !prev)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.sectionTitle}>{t(language, "globalAchievements")}</Text>
+            <Chevron expanded={globalExpanded} />
+          </TouchableOpacity>
+          <ProgressBar
+            progress={completedGlobal}
+            threshold={globalAchievements.length}
+            color={theme.colors.accent}
+          />
+          {globalExpanded &&
+            sortAchievements(filteredGlobal).map((a) => (
+              <AchievementRow key={a.id} achievement={a} language={language} />
+            ))}
+          {globalExpanded && filteredGlobal.length === 0 && (
+            <Text style={styles.emptyText}>{t(language, "emptyFilter")}</Text>
+          )}
+        </View>
+
+        {view?.categories.map((category) => {
+          const list = sortAchievements(filteredCategory(category));
+          const isExpanded = !!expandedCategories?.[category.id];
+          const totalAchievements = category.achievements?.length || 0;
+          const completedAchievements = (category.achievements || []).filter(
+            (a) => getDisplayStatus(a.status) === "completed"
+          ).length;
+          return (
+            <View key={category.id} style={styles.section}>
+              <TouchableOpacity
+                style={styles.categoryHeader}
+                onPress={() => toggleCategory(category.id)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.sectionTitle}>{category.label}</Text>
+                <Chevron expanded={isExpanded} />
+              </TouchableOpacity>
+              <ProgressBar
+                progress={completedAchievements}
+                threshold={totalAchievements}
+                color={theme.colors.accent}
+              />
+              {isExpanded &&
+                list.map((a) => (
+                  <AchievementRow key={a.id} achievement={a} language={language} />
+                ))}
+              {isExpanded && list.length === 0 && (
+                <Text style={styles.emptyText}>{t(language, "emptyFilter")}</Text>
+              )}
+            </View>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
