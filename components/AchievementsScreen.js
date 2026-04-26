@@ -202,3 +202,223 @@ function AchievementsScreen({ language, onClose, onViewed }) {
     </View>
   );
 }
+
+// Bara mica ce arata cat este completat dintr-o sectiune.
+function ProgressBar({ progress, threshold, color }) {
+  const ratio = threshold > 0 ? Math.min(progress / threshold, 1) : 0;
+  return (
+    <View style={styles.progressBar}>
+      <View
+        style={[
+          styles.progressFill,
+          { width: `${ratio * 100}%`, backgroundColor: color || theme.colors.accent },
+        ]}
+      />
+    </View>
+  );
+}
+
+// Chevron-ul se roteste cand sectiunea este deschisa.
+function Chevron({ expanded }) {
+  return <View style={[styles.chevron, expanded && styles.chevronExpanded]} />;
+}
+
+// Randul unei realizari arata titlul, progresul si statusul curent.
+function AchievementRow({ achievement, language }) {
+  const displayStatus = getDisplayStatus(achievement.status);
+  const completed = displayStatus === "completed";
+  const ratio =
+    achievement.threshold > 0
+      ? Math.min(achievement.progress / achievement.threshold, 1)
+      : 0;
+  return (
+    <View style={styles.achievementRow}>
+      <View style={styles.achievementHeader}>
+        <Text style={styles.achievementTitle}>{achievement.title}</Text>
+        <Text style={styles.achievementStatus}>
+          {achievement.progress}/{achievement.threshold} -{" "}
+          {completed
+            ? t(language, "statusCompleted")
+            : t(language, "statusInProgress")}
+        </Text>
+      </View>
+      <Text style={styles.achievementDesc}>{achievement.description}</Text>
+      <View style={styles.progressBar}>
+        <View
+          style={[
+            styles.progressFill,
+            {
+              width: `${ratio * 100}%`,
+              backgroundColor: completed ? theme.colors.gold : theme.colors.accent,
+            },
+          ]}
+        />
+      </View>
+    </View>
+  );
+}
+
+export default AchievementsScreen;
+
+// Stilurile pentru ecranul de realizari.
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.xl,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  headerText: {
+    alignItems: "center",
+    flex: 1,
+  },
+  backBtn: {
+    backgroundColor: theme.colors.surfaceStrong,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: theme.radius.md,
+    width: 44,
+    alignItems: "center",
+  },
+  backBtnText: {
+    color: theme.colors.text,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  title: {
+    color: theme.colors.text,
+    fontSize: 26,
+    fontWeight: "800",
+    fontFamily: theme.fonts.title,
+    textAlign: "center",
+  },
+  subtitle: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+    marginTop: 4,
+    textAlign: "center",
+  },
+  filters: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginBottom: 12,
+    justifyContent: "center",
+  },
+  filterBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+    backgroundColor: theme.colors.surfaceStrong,
+  },
+  filterBtnSelected: {
+    backgroundColor: theme.colors.accent,
+    borderColor: theme.colors.accent,
+  },
+  filterText: {
+    color: theme.colors.textMuted,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  filterTextSelected: {
+    color: theme.colors.bgDeep,
+  },
+  scrollContent: {
+    paddingBottom: 24,
+    gap: 16,
+  },
+  section: {
+    backgroundColor: theme.colors.surface,
+    padding: 14,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    gap: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 5,
+  },
+  sectionTitle: {
+    color: theme.colors.text,
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  categoryHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  chevron: {
+    width: 10,
+    height: 10,
+    borderRightWidth: 2,
+    borderBottomWidth: 2,
+    borderColor: theme.colors.textMuted,
+    transform: [{ rotate: "45deg" }],
+    marginTop: 2,
+  },
+  chevronExpanded: {
+    transform: [{ rotate: "-135deg" }],
+    marginTop: 0,
+  },
+  progressBar: {
+    height: 6,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.bgDeep,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 999,
+  },
+  achievementRow: {
+    backgroundColor: theme.colors.surfaceStrong,
+    borderRadius: theme.radius.md,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+    gap: 6,
+  },
+  achievementHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  achievementTitle: {
+    color: theme.colors.text,
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  achievementStatus: {
+    color: theme.colors.textFaint,
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  achievementDesc: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+  },
+  lockedText: {
+    color: theme.colors.textFaint,
+  },
+  emptyText: {
+    color: theme.colors.textFaint,
+    fontSize: 12,
+    textAlign: "center",
+    marginTop: 4,
+  },
+});
