@@ -22,6 +22,16 @@ O aplicație mobilă de quiz de cultură generală, construită cu React Native 
 - **Expo AV** / **Expo Haptics** pentru sunet și feedback tactil
 - **Expo Router** pentru navigare
 
+## Capturi de Ecran
+
+<p align="center">
+  <img src="screenshots/meniu_principal.jpeg" width="180" alt="Meniu Principal"/>
+  <img src="screenshots/alege_tip_joc.jpeg" width="180" alt="Alege Tip Joc"/>
+  <img src="screenshots/rulare_joc.jpeg" width="180" alt="Rulare Joc"/>
+  <img src="screenshots/achievements.jpeg" width="180" alt="Achievements"/>
+  <img src="screenshots/domeniu.jpeg" width="180" alt="Level"/>
+</p>
+
 ## Pornire Rapidă
 
 ```bash
