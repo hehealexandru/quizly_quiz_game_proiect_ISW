@@ -166,3 +166,133 @@ function CategoryMasteryScreen({ language, onClose }) {
     </View>
   );
 }
+
+// Stilurile pentru lista si pagina de detalii la mastery.
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.xl,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  loading: {
+    color: theme.colors.text,
+    textAlign: "center",
+    marginTop: 40,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  closeBtn: {
+    backgroundColor: theme.colors.surfaceStrong,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: theme.radius.md,
+    width: 44,
+    alignItems: "center",
+  },
+  closeBtnText: {
+    color: theme.colors.text,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  headerTitle: {
+    color: theme.colors.text,
+    fontSize: 20,
+    fontWeight: "800",
+    fontFamily: theme.fonts.title,
+  },
+  topSection: {
+    marginTop: 16,
+    marginBottom: 12,
+    padding: 12,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.lg,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  sectionTitle: {
+    color: theme.colors.text,
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+  topList: {
+    gap: 6,
+  },
+  topItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  topLabel: {
+    color: theme.colors.textMuted,
+    fontWeight: "600",
+  },
+  topValue: {
+    color: theme.colors.accent,
+    fontWeight: "700",
+  },
+  list: {
+    gap: 12,
+    paddingBottom: 40,
+  },
+  detailsTitle: {
+    color: theme.colors.text,
+    fontSize: 22,
+    fontWeight: "800",
+    fontFamily: theme.fonts.title,
+    textAlign: "center",
+    marginTop: 12,
+  },
+  detailsLevel: {
+    color: theme.colors.accent,
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+  },
+  detailsXp: {
+    color: theme.colors.textMuted,
+    textAlign: "center",
+    marginBottom: 8,
+    fontFamily: theme.fonts.mono,
+  },
+  nextRewardText: {
+    color: theme.colors.gold,
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 16,
+    fontWeight: "600",
+  },
+  cosmeticsBtn: {
+    marginTop: 12,
+    backgroundColor: theme.colors.accent,
+    paddingVertical: 12,
+    borderRadius: theme.radius.md,
+  },
+  cosmeticsBtnText: {
+    color: theme.colors.bgDeep,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  cosmeticsList: {
+    marginTop: 10,
+    padding: 12,
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+    gap: 6,
+  },
+  cosmeticItem: {
+    color: theme.colors.textMuted,
+    fontSize: 12,
+  },
+});
+
+export default CategoryMasteryScreen;
