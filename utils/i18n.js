@@ -241,3 +241,57 @@ const STRINGS = {
     streak: "Seria",
   },
 };
+
+// Etichetele traduse pentru categorii.
+const CATEGORY_LABELS = {
+  en: {
+    9: "General Knowledge",
+    11: "Movies",
+    12: "Music",
+    17: "Science",
+    21: "Sports",
+    22: "Geography",
+    23: "History",
+  },
+  ro: {
+    9: "Cultura generala",
+    11: "Filme",
+    12: "Muzica",
+    17: "Stiinta",
+    21: "Sport",
+    22: "Geografie",
+    23: "Istorie",
+  },
+};
+
+// Etichetele traduse pentru dificultati.
+const DIFFICULTY_LABELS = {
+  en: {
+    easy: "easy",
+    medium: "medium",
+    hard: "hard",
+  },
+  ro: {
+    easy: "usor",
+    medium: "mediu",
+    hard: "greu",
+  },
+};
+
+// Citeste un text dupa limba si cheia ceruta.
+export function t(lang, key) {
+  if (STRINGS[lang] && STRINGS[lang][key]) return STRINGS[lang][key];
+  return STRINGS.en[key] || key;
+}
+
+// Intoarce numele categoriei in limba aleasa.
+export function getCategoryLabel(lang, id) {
+  const labels = CATEGORY_LABELS[lang] || CATEGORY_LABELS.en;
+  return labels[id] || CATEGORY_LABELS.en[id] || "Other";
+}
+
+// Intoarce numele dificultatii in limba aleasa.
+export function getDifficultyLabel(lang, difficulty) {
+  const labels = DIFFICULTY_LABELS[lang] || DIFFICULTY_LABELS.en;
+  return labels[difficulty] || DIFFICULTY_LABELS.en[difficulty] || difficulty;
+}
