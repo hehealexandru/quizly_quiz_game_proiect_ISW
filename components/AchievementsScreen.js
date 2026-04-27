@@ -11,7 +11,7 @@ import {
   hasNewUnlocks,
   loadAchievementsData,
   markAchievementsViewed,
-} from "../utils/achievements";
+} from "../utils/Achievements";
 import { t } from "../utils/i18n";
 import { theme } from "../utils/theme";
 

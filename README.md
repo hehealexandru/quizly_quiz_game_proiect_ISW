@@ -70,7 +70,7 @@ quizly-mobile/
 │   ├── AchievementsScreen.js
 │   └── CategoryMasteryScreen.js
 ├── utils/                    # Logica de business
-│   ├── achievements.js
+│   ├── Achievements.js
 │   ├── masteryService.js
 │   ├── i18n.js
 │   ├── highscores.js
