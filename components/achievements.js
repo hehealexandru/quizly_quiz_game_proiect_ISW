@@ -218,3 +218,108 @@ function buildGlobalStreakAchievements({
     };
   });
 }
+// Citeste progresul la realizari din storage.
+export async function loadAchievementsData() {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (!raw) return getDefaultData();
+    const parsed = JSON.parse(raw);
+    return {
+      ...getDefaultData(),
+      ...parsed,
+      correctByCategory: parsed.correctByCategory || {},
+      correctByCategoryDifficulty: parsed.correctByCategoryDifficulty || {},
+      unlockedAtById: parsed.unlockedAtById || {},
+    };
+  } catch (error) {
+    return getDefaultData();
+  }
+}
+
+// Salveaza progresul curent la realizari.
+async function saveAchievementsData(data) {
+  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// Deblocheaza o realizare doar cand pragul a fost atins.
+function maybeUnlockAchievement(data, id, threshold, progress) {
+  if (data.unlockedAtById[id]) return null;
+  if (progress < threshold) return null;
+  const unlockedAt = new Date().toISOString();
+  data.unlockedAtById[id] = unlockedAt;
+  return { id, unlockedAt };
+}
+
+// Actualizeaza progresul dupa fiecare raspuns nou.
+export async function recordAnswer({ categoryId, isCorrect, difficulty, mode }) {
+  const data = await loadAchievementsData();
+  const newUnlocks = [];
+
+  if (isCorrect) {
+    const catKey = String(categoryId);
+    const current = safeNumber(data.correctByCategory[catKey]);
+    const updated = current + 1;
+    data.correctByCategory[catKey] = updated;
+
+    if (mode === "single" && DIFFICULTY_KEYS.includes(difficulty)) {
+      const diffMap = data.correctByCategoryDifficulty || {};
+      const currentDiffMap = diffMap[catKey] || {};
+      const currentDiff = safeNumber(currentDiffMap[difficulty]);
+      const updatedDiff = currentDiff + 1;
+      diffMap[catKey] = { ...currentDiffMap, [difficulty]: updatedDiff };
+      data.correctByCategoryDifficulty = diffMap;
+
+      CATEGORY_DIFFICULTY_MILESTONES.forEach((threshold) => {
+        const id = buildCategoryDifficultyAchievementId(
+          categoryId,
+          difficulty,
+          threshold
+        );
+        const unlocked = maybeUnlockAchievement(
+          data,
+          id,
+          threshold,
+          updatedDiff
+        );
+        if (unlocked) newUnlocks.push(unlocked);
+      });
+    }
+
+    data.totalCorrect = safeNumber(data.totalCorrect) + 1;
+    data.currentStreak = safeNumber(data.currentStreak) + 1;
+    data.bestStreak = Math.max(safeNumber(data.bestStreak), data.currentStreak);
+
+    CATEGORY_MILESTONES.forEach((threshold) => {
+      const id = buildCategoryAchievementId(categoryId, threshold);
+      const unlocked = maybeUnlockAchievement(data, id, threshold, updated);
+      if (unlocked) newUnlocks.push(unlocked);
+    });
+
+    GLOBAL_TOTAL_MILESTONES.forEach((threshold) => {
+      const id = buildGlobalAchievementId("total", threshold);
+      const unlocked = maybeUnlockAchievement(
+        data,
+        id,
+        threshold,
+        data.totalCorrect
+      );
+      if (unlocked) newUnlocks.push(unlocked);
+    });
+
+    GLOBAL_STREAK_MILESTONES.forEach((threshold) => {
+      const id = buildGlobalAchievementId("streak", threshold);
+      const unlocked = maybeUnlockAchievement(
+        data,
+        id,
+        threshold,
+        data.bestStreak
+      );
+      if (unlocked) newUnlocks.push(unlocked);
+    });
+  } else {
+    data.currentStreak = 0;
+  }
+
+  await saveAchievementsData(data);
+  return { data, newUnlocks };
+}
