@@ -33,3 +33,83 @@ function getDefaultData() {
     lastViewedAt: null,
   };
 }
+// Evita erorile cand vine un numar invalid.
+function safeNumber(value) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// Strange toate categoriile disponibile din datele aplicatiei.
+export function getAllCategoryIds() {
+  const ids = new Set();
+  [CUSTOM_QUESTIONS_EN, CUSTOM_QUESTIONS_RO].forEach((list) => {
+    list.forEach((q) => ids.add(Number(q.category)));
+  });
+  return [...ids].sort((a, b) => a - b);
+}
+
+// Alege lista corecta de titluri pentru limba curenta.
+function getCategoryLevels(lang) {
+  return CATEGORY_LEVELS[lang] || CATEGORY_LEVELS.en;
+}
+
+// Creeaza id-ul unic pentru o realizare de categorie.
+function buildCategoryAchievementId(categoryId, threshold) {
+  return `cat_${categoryId}_t_${threshold}`;
+}
+
+// Creeaza id-ul unic pentru o realizare de categorie si dificultate.
+function buildCategoryDifficultyAchievementId(categoryId, difficulty, threshold) {
+  return `cat_${categoryId}_diff_${difficulty}_t_${threshold}`;
+}
+
+// Creeaza id-ul unic pentru realizarile globale.
+function buildGlobalAchievementId(type, threshold) {
+  return `global_${type}_${threshold}`;
+}
+
+// Pune litera mare la inceput pentru etichetele afisate.
+function capitalizeLabel(label) {
+  if (!label || typeof label !== "string") return label || "";
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+// Construieste lista de realizari simple pe categorie.
+function buildCategoryAchievements({
+  language,
+  categoryId,
+  correctCount,
+  unlockedAtById,
+}) {
+  const levels = getCategoryLevels(language);
+  return CATEGORY_MILESTONES.map((threshold, index) => {
+    const title = levels[index] || levels[levels.length - 1];
+    const description =
+      language === "ro"
+        ? `Raspunde corect la ${threshold} intrebari in ${getCategoryLabel(
+            language,
+            categoryId
+          )}.`
+        : `Answer ${threshold} questions correctly in ${getCategoryLabel(
+            language,
+            categoryId
+          )}.`;
+    const id = buildCategoryAchievementId(categoryId, threshold);
+    const unlockedAt = unlockedAtById[id] || null;
+    const progress = Math.min(correctCount, threshold);
+    const status = unlockedAt
+      ? "unlocked"
+      : correctCount > 0
+        ? "in_progress"
+        : "locked";
+    return {
+      id,
+      title,
+      description,
+      threshold,
+      progress,
+      status,
+      unlockedAt,
+    };
+  });
+}
