@@ -14,7 +14,7 @@ import {
 
 import { CUSTOM_QUESTIONS_EN } from "../data";
 import { CUSTOM_QUESTIONS_RO } from "../data-ro";
-import { recordAnswer, showAchievementToast } from "../utils/Achievements";
+import { recordAnswer, showAchievementToast } from "../utils/achievements";
 import { decodeHtml } from "../utils/decodeHtml";
 import { t } from "../utils/i18n";
 import { equipReward, recordMasteryAnswer } from "../utils/masteryService";
