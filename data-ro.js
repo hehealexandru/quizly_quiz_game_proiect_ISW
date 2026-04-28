@@ -23769,3 +23769,21 @@ export const CUSTOM_QUESTIONS_RO = [
     incorrect_answers: ["Timbuktu", "Gao", "Sikasso"],
   },
   
+  {
+    category: 9,
+    type: "multiple",
+    difficulty: "hard",
+    question: "Care element chimic are simbolul 'K'?",
+    correct_answer: "Potasiu",
+    incorrect_answers: ["Krypton", "Fosfor", "Platină"],
+  },
+  {
+    category: 9,
+    type: "multiple",
+    difficulty: "hard",
+    question: "Cine a compus 'Cavalcada Valkiriilor'?",
+    correct_answer: "Richard Wagner",
+    incorrect_answers: ["Johannes Brahms", "Franz Liszt", "Giuseppe Verdi"],
+  },
+];
+
