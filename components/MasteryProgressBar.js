@@ -10,3 +10,19 @@ function MasteryProgressBar({ xp, xpRequired, color = theme.colors.accent }) {
     </View>
   );
 }
+
+// Stilurile barei de progres.
+const styles = StyleSheet.create({
+  bar: {
+    height: 8,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.bgDeep,
+    overflow: "hidden",
+  },
+  fill: {
+    height: "100%",
+    borderRadius: theme.radius.pill,
+  },
+});
+
+export default MasteryProgressBar;
