@@ -326,3 +326,83 @@ export async function recordAnswer({ categoryId, isCorrect, difficulty, mode }) 
   await saveAchievementsData(data);
   return { data, newUnlocks };
 }
+
+// Pregateste tot progresul intr-o forma usor de afisat in UI.
+export function getAchievementsView({ language, data }) {
+  const categoryIds = new Set(getAllCategoryIds());
+  Object.keys(data.correctByCategory || {}).forEach((id) =>
+    categoryIds.add(Number(id))
+  );
+
+  const categories = [...categoryIds].sort((a, b) => a - b).map((id) => {
+    const correctCount = safeNumber(data.correctByCategory?.[String(id)]);
+    const correctByDifficulty =
+      data.correctByCategoryDifficulty?.[String(id)] || {};
+    return {
+      id,
+      label: getCategoryLabel(language, id),
+      correctCount,
+      achievements: [
+        ...buildCategoryAchievements({
+          language,
+          categoryId: id,
+          correctCount,
+          unlockedAtById: data.unlockedAtById || {},
+        }),
+        ...buildCategoryDifficultyAchievements({
+          language,
+          categoryId: id,
+          correctByDifficulty,
+          unlockedAtById: data.unlockedAtById || {},
+        }),
+      ],
+    };
+  });
+
+  const globalAchievements = [
+    ...buildGlobalTotalAchievements({
+      language,
+      totalCorrect: safeNumber(data.totalCorrect),
+      unlockedAtById: data.unlockedAtById || {},
+    }),
+    ...buildGlobalStreakAchievements({
+      language,
+      bestStreak: safeNumber(data.bestStreak),
+      unlockedAtById: data.unlockedAtById || {},
+    }),
+  ];
+
+  return {
+    categories,
+    globalAchievements,
+    totalCorrect: safeNumber(data.totalCorrect),
+    currentStreak: safeNumber(data.currentStreak),
+    bestStreak: safeNumber(data.bestStreak),
+  };
+}
+
+// Marcheaza momentul in care utilizatorul a vazut realizarile.
+export async function markAchievementsViewed() {
+  const data = await loadAchievementsData();
+  data.lastViewedAt = new Date().toISOString();
+  await saveAchievementsData(data);
+  return data;
+}
+
+// Verifica daca exista realizari noi fata de ultima vizita.
+export function hasNewUnlocks(data) {
+  const lastViewed = data.lastViewedAt ? new Date(data.lastViewedAt).getTime() : 0;
+  return Object.values(data.unlockedAtById || {}).some((date) => {
+    const ts = new Date(date).getTime();
+    return Number.isFinite(ts) && ts > lastViewed;
+  });
+}
+
+// Afiseaza un mesaj scurt cand se deblocheaza ceva nou.
+export function showAchievementToast(language) {
+  const message = t(language, "achievementUnlocked");
+  if (Platform.OS === "android") {
+    ToastAndroid.show(message, ToastAndroid.SHORT);
+  } else {
+    Alert.alert(message);
+  }
