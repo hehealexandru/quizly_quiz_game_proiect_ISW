@@ -109,3 +109,125 @@ export async function loadMasteryState() {
 async function saveMasteryState(state) {
   await saveJSON(STORAGE_KEY, state);
 }
+
+// Construieste obiectul final pentru o recompensa.
+function buildReward({ language, categoryId, reward }) {
+  const categoryLabel = getCategoryLabel(language, categoryId);
+  const label = t(language, reward.labelKey);
+  return {
+    id: `${categoryId}_${reward.type}_${reward.level}`,
+    level: reward.level,
+    type: reward.type,
+    label: `${label} ${categoryLabel}`,
+  };
+}
+
+// Intoarce lista de recompense pentru o categorie.
+export function getRewardsForCategory({ language, categoryId, unlockedRewards }) {
+  return REWARD_MAP.map((reward) => {
+    const info = buildReward({ language, categoryId, reward });
+    const unlocked =
+      unlockedRewards?.cosmetics?.includes(info.id) ||
+      unlockedRewards?.perks?.includes(info.id);
+    return {
+      ...info,
+      unlocked,
+    };
+  });
+}
+
+// Adauga recompensa noua in lista corecta.
+function addUnlockedReward(state, rewardId, type) {
+  if (type === "perk") {
+    if (!state.unlockedRewards.perks.includes(rewardId)) {
+      state.unlockedRewards.perks.push(rewardId);
+    }
+  } else {
+    if (!state.unlockedRewards.cosmetics.includes(rewardId)) {
+      state.unlockedRewards.cosmetics.push(rewardId);
+    }
+  }
+}
+
+// Marcheaza cosmetic-ul echipat pentru o categorie.
+function equipCosmetic(state, categoryId, rewardId) {
+  state.unlockedRewards.equipped[String(categoryId)] = rewardId;
+}
+
+// Calculeaza XP-ul de baza in functie de dificultate.
+function computeBaseXp({ isCorrect, difficulty }) {
+  const base = isCorrect ? XP_RULES.correct : XP_RULES.wrong;
+  const mult =
+    difficulty && XP_RULES.difficultyMultiplier[difficulty]
+      ? XP_RULES.difficultyMultiplier[difficulty]
+      : 1;
+  return Math.round(base * mult);
+}
+
+// Actualizeaza XP-ul si nivelul dupa fiecare raspuns.
+export async function recordMasteryAnswer({
+  categoryId,
+  isCorrect,
+  difficulty,
+  language = "en",
+}) {
+  const state = await loadMasteryState();
+  const key = String(categoryId);
+  const categoryState = state.masteryByCategory[key] || createDefaultCategoryState();
+
+  let streakBonus = 0;
+  if (isCorrect) {
+    const newStreak = safeNumber(categoryState.streak) + 1;
+    categoryState.streak = newStreak;
+    streakBonus = Math.min(
+      XP_RULES.streakBonusMax,
+      XP_RULES.streakBonusPerCorrect * newStreak
+    );
+  } else {
+    categoryState.streak = 0;
+  }
+
+  const baseXp = computeBaseXp({ isCorrect, difficulty });
+  const totalGain = isCorrect ? baseXp + streakBonus : baseXp;
+
+  categoryState.totalXp = safeNumber(categoryState.totalXp) + totalGain;
+  categoryState.xp = safeNumber(categoryState.xp) + totalGain;
+  categoryState.lastUpdated = new Date().toISOString();
+
+  let levelUpInfo = null;
+  let leveledUp = false;
+
+  while (categoryState.level < MAX_LEVEL) {
+    const required = getXpRequired(categoryState.level);
+    if (categoryState.xp < required) break;
+    categoryState.xp -= required;
+    categoryState.level += 1;
+    leveledUp = true;
+
+    const reward = REWARD_MAP.find((r) => r.level === categoryState.level);
+    if (reward) {
+      const rewardInfo = buildReward({
+        language,
+        categoryId,
+        reward,
+      });
+      addUnlockedReward(state, rewardInfo.id, reward.type === "perk" ? "perk" : "cosmetic");
+      levelUpInfo = {
+        level: categoryState.level,
+        reward: rewardInfo,
+        canEquip: reward.type !== "perk",
+      };
+    }
+  }
+
+  state.masteryByCategory[key] = categoryState;
+  await saveMasteryState(state);
+
+  return {
+    state,
+    leveledUp,
+    levelUpInfo,
+    xpGained: totalGain,
+  };
+}
+
