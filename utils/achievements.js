@@ -114,3 +114,109 @@ function buildCategoryAchievements({
     };
   });
 }
+
+// Construieste realizarile pe categorie + dificultate.
+function buildCategoryDifficultyAchievements({
+  language,
+  categoryId,
+  correctByDifficulty,
+  unlockedAtById,
+}) {
+  const categoryLabel = getCategoryLabel(language, categoryId);
+  return DIFFICULTY_KEYS.flatMap((difficulty) => {
+    const count = safeNumber(correctByDifficulty?.[difficulty]);
+    const diffLabelRaw = getDifficultyLabel(language, difficulty);
+    const diffLabel = capitalizeLabel(diffLabelRaw);
+    return CATEGORY_DIFFICULTY_MILESTONES.map((threshold, index) => {
+      const suffix = DIFFICULTY_ROMANS[index] || "";
+      const title = `${diffLabel} ${suffix}`.trim();
+      const description =
+        language === "ro"
+          ? `Raspunde corect la ${threshold} intrebari pe dificultatea ${diffLabelRaw} in ${categoryLabel}.`
+          : `Answer ${threshold} questions correctly on ${diffLabelRaw} difficulty in ${categoryLabel}.`;
+      const id = buildCategoryDifficultyAchievementId(
+        categoryId,
+        difficulty,
+        threshold
+      );
+      const unlockedAt = unlockedAtById[id] || null;
+      const progress = Math.min(count, threshold);
+      const status = unlockedAt
+        ? "unlocked"
+        : count > 0
+          ? "in_progress"
+          : "locked";
+      return {
+        id,
+        title,
+        description,
+        threshold,
+        progress,
+        status,
+        unlockedAt,
+      };
+    });
+  });
+}
+
+// Construieste realizarile globale pentru total raspunsuri corecte.
+function buildGlobalTotalAchievements({ language, totalCorrect, unlockedAtById }) {
+  return GLOBAL_TOTAL_MILESTONES.map((threshold, index) => {
+    const suffix = ["I", "II", "III"][index] || "";
+    const title = language === "ro" ? `Total Corecte ${suffix}` : `Total Correct ${suffix}`;
+    const description =
+      language === "ro"
+        ? `Ajunge la ${threshold} raspunsuri corecte in total.`
+        : `Reach ${threshold} total correct answers.`;
+    const id = buildGlobalAchievementId("total", threshold);
+    const unlockedAt = unlockedAtById[id] || null;
+    const progress = Math.min(totalCorrect, threshold);
+    const status = unlockedAt
+      ? "unlocked"
+      : totalCorrect > 0
+        ? "in_progress"
+        : "locked";
+    return {
+      id,
+      title: title.trim(),
+      description,
+      threshold,
+      progress,
+      status,
+      unlockedAt,
+    };
+  });
+}
+
+// Construieste realizarile globale pentru streak.
+function buildGlobalStreakAchievements({
+  language,
+  bestStreak,
+  unlockedAtById,
+}) {
+  return GLOBAL_STREAK_MILESTONES.map((threshold, index) => {
+    const suffix = ["I", "II", "III"][index] || "";
+    const title = language === "ro" ? `Streak ${suffix}` : `Streak ${suffix}`;
+    const description =
+      language === "ro"
+        ? `Raspunde corect la ${threshold} intrebari consecutive.`
+        : `Answer ${threshold} questions correctly in a row.`;
+    const id = buildGlobalAchievementId("streak", threshold);
+    const unlockedAt = unlockedAtById[id] || null;
+    const progress = Math.min(bestStreak, threshold);
+    const status = unlockedAt
+      ? "unlocked"
+      : bestStreak > 0
+        ? "in_progress"
+        : "locked";
+    return {
+      id,
+      title: title.trim(),
+      description,
+      threshold,
+      progress,
+      status,
+      unlockedAt,
+    };
+  });
+}
