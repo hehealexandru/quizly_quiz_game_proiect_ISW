@@ -231,3 +231,45 @@ export async function recordMasteryAnswer({
   };
 }
 
+// Echiparea este salvata separat ca sa ramana dupa restart.
+export async function equipReward({ categoryId, rewardId }) {
+  const state = await loadMasteryState();
+  equipCosmetic(state, categoryId, rewardId);
+  await saveMasteryState(state);
+  return state;
+}
+
+// Pregateste sumarul complet pentru o categorie.
+export function getCategorySummary({ language, categoryId, categoryState, unlockedRewards }) {
+  const level = safeNumber(categoryState?.level) || 1;
+  const xp = safeNumber(categoryState?.xp);
+  const xpRequired = getXpRequired(level);
+  const rewards = getRewardsForCategory({ language, categoryId, unlockedRewards });
+  const nextReward = rewards.find((r) => !r.unlocked);
+  return {
+    categoryId,
+    label: getCategoryLabel(language, categoryId),
+    level,
+    xp,
+    xpRequired,
+    totalXp: safeNumber(categoryState?.totalXp),
+    rewards,
+    nextRewardLevel: nextReward ? nextReward.level : null,
+  };
+}
+
+// Returneaza categoriile cele mai avansate dupa XP total.
+export function getTopCategories({ language, state, limit = 3 }) {
+  const list = getAllCategoryIds().map((id) =>
+    getCategorySummary({
+      language,
+      categoryId: id,
+      categoryState: state.masteryByCategory[String(id)],
+      unlockedRewards: state.unlockedRewards,
+    })
+  );
+  return list
+    .sort((a, b) => b.totalXp - a.totalXp)
+    .slice(0, limit);
+}
+
