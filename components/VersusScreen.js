@@ -535,3 +535,283 @@ function VersusScreen({ onExit, language, onAchievementsUnlocked }) {
     </View>
   );
 }
+                  
+// Stilurile pentru ecranul versus si modalele lui.
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: theme.colors.bgDeep,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: theme.colors.bgDeep,
+  },
+  setupContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.bgDeep,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  setupTitle: {
+    fontSize: 42,
+    fontWeight: "900",
+    color: theme.colors.text,
+    fontFamily: theme.fonts.title,
+    marginBottom: 8,
+    letterSpacing: 2,
+  },
+  setupSubtitle: {
+    fontSize: 18,
+    color: theme.colors.textMuted,
+    marginBottom: 30,
+  },
+  infoBadge: {
+    backgroundColor: theme.colors.accentSoft,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: theme.radius.md,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  infoText: {
+    color: theme.colors.gold,
+    fontWeight: "bold",
+    fontSize: 14,
+    textAlign: "center",
+  },
+  inputCard: {
+    width: "100%",
+    marginBottom: 20,
+  },
+  inputLabel: {
+    color: theme.colors.textMuted,
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  input: {
+    backgroundColor: theme.colors.surfaceStrong,
+    padding: 16,
+    borderRadius: theme.radius.md,
+    color: theme.colors.text,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  startBtn: {
+    backgroundColor: theme.colors.accent,
+    paddingVertical: 18,
+    paddingHorizontal: 40,
+    borderRadius: theme.radius.lg,
+    marginTop: 20,
+    width: "100%",
+    alignItems: "center",
+    shadowColor: theme.colors.accent,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  startBtnText: {
+    color: theme.colors.bgDeep,
+    fontWeight: "800",
+    fontSize: 18,
+  },
+  cancelText: {
+    color: theme.colors.danger,
+    fontSize: 16,
+  },
+  halfScreen: {
+    flex: 1,
+    padding: 8,
+    justifyContent: "center",
+  },
+  centerDivider: {
+    minHeight: 62,
+    backgroundColor: theme.colors.bgDeep,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+    gap: 4,
+    paddingVertical: 6,
+  },
+  seriesLabel: {
+    color: theme.colors.textFaint,
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 1,
+    textTransform: "uppercase",
+  },
+  seriesScore: {
+    color: theme.colors.gold,
+    fontSize: 18,
+    fontWeight: "900",
+    fontFamily: theme.fonts.mono,
+  },
+  smallExitBtn: {
+    backgroundColor: theme.colors.surfaceStrong,
+    paddingHorizontal: 16,
+    paddingVertical: 4,
+    borderRadius: theme.radius.pill,
+    borderWidth: 1,
+    borderColor: theme.colors.borderSoft,
+  },
+  smallExitText: {
+    color: theme.colors.textMuted,
+    fontWeight: "bold",
+    fontSize: 10,
+  },
+  playerZone: {
+    flex: 1,
+    borderRadius: theme.radius.lg,
+    padding: 16,
+    justifyContent: "space-between",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  rotatedZone: {
+    transform: [{ rotate: "180deg" }],
+  },
+  playerHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  pLabel: {
+    fontSize: 18,
+    fontWeight: "900",
+    textTransform: "uppercase",
+  },
+  pScore: {
+    fontSize: 24,
+    fontWeight: "bold",
+    minWidth: 56,
+    textAlign: "right",
+    fontVariant: ["tabular-nums"],
+    fontFamily: theme.fonts.mono,
+  },
+  pLives: {
+    fontSize: 14,
+    marginTop: 2,
+    fontWeight: "bold",
+  },
+  quizContent: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  questionText: {
+    color: theme.colors.text,
+    fontSize: 17,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 16,
+    lineHeight: 24,
+  },
+  answersGrid: {
+    gap: 10,
+  },
+  answerBtn: {
+    backgroundColor: theme.colors.surfaceStrong,
+    paddingVertical: 14,
+    paddingHorizontal: 10,
+    borderRadius: theme.radius.md,
+  },
+  answerText: {
+    color: theme.colors.text,
+    textAlign: "center",
+    fontWeight: "600",
+    fontSize: 15,
+  },
+  waitingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    opacity: 0.7,
+  },
+  waitingText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    opacity: 0.6,
+  },
+  progressText: {
+    textAlign: "center",
+    color: theme.colors.textFaint,
+    fontSize: 12,
+    marginTop: 10,
+    fontWeight: "600",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(7,11,20,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "75%",
+    backgroundColor: theme.colors.surface,
+    padding: 24,
+    borderRadius: theme.radius.xl,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: theme.colors.gold,
+  },
+  modalTitle: {
+    color: theme.colors.danger,
+    fontSize: 26,
+    fontWeight: "900",
+    marginBottom: 5,
+  },
+  modalText: {
+    color: theme.colors.text,
+    marginBottom: 20,
+    textAlign: "center",
+    fontSize: 16,
+  },
+  gameOverTitle: {
+    color: theme.colors.gold,
+  },
+  gameOverText: {
+    lineHeight: 24,
+  },
+  primaryActionBtn: {
+    backgroundColor: theme.colors.accent,
+    padding: 14,
+    borderRadius: theme.radius.md,
+    width: "100%",
+    marginBottom: 12,
+  },
+  primaryActionBtnText: {
+    color: theme.colors.bgDeep,
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 16,
+  },
+  secondaryActionBtn: {
+    backgroundColor: theme.colors.surfaceStrong,
+    padding: 14,
+    borderRadius: theme.radius.md,
+    width: "100%",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  secondaryActionBtnText: {
+    color: theme.colors.text,
+    fontWeight: "bold",
+    textAlign: "center",
+    fontSize: 16,
+  },
+  giveUpBtn: {
+    paddingVertical: 8,
+  },
+  giveUpText: {
+    color: theme.colors.textFaint,
+    textDecorationLine: "underline",
+    fontSize: 14,
+  },
+});
+
+export default VersusScreen;
+
