@@ -254,3 +254,131 @@ function VersusScreen({ onExit, language, onAchievementsUnlocked }) {
       scoreTwo: nextScores.p2,
     });
   }
+
+  // Proceseaza raspunsul jucatorului activ si schimba starea meciului.
+  function handleAnswer(answer) {
+      setAnswered(true);
+      setSelected(answer);
+
+      const isCorrect = answer === questions[current]?.correct;
+      let currentPlayerDied = false;
+      let nextP1Score = p1Score;
+      let nextP2Score = p2Score;
+
+      if (isCorrect) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        playEffect("correct");
+        if (turn === 1) {
+          nextP1Score += 100;
+          setP1Score(nextP1Score);
+        } else {
+          nextP2Score += 100;
+          setP2Score(nextP2Score);
+        }
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+        playEffect("wrong");
+
+        if (turn === 1) {
+          nextP1Score -= 50;
+          setP1Score(nextP1Score);
+        } else {
+          nextP2Score -= 50;
+          setP2Score(nextP2Score);
+        }
+
+        if (turn === 1) {
+          const nextLives = p1Lives - 1;
+          setP1Lives(nextLives);
+          if (nextLives <= 0) currentPlayerDied = true;
+        } else {
+          const nextLives = p2Lives - 1;
+          setP2Lives(nextLives);
+          if (nextLives <= 0) currentPlayerDied = true;
+        }
+      }
+
+      if (activeCategoryId) {
+        recordAnswer({
+          categoryId: activeCategoryId,
+          isCorrect,
+          mode: "versus",
+        }).then(({ newUnlocks }) => {
+          if (newUnlocks.length > 0) {
+            showAchievementToast(language);
+            onAchievementsUnlocked && onAchievementsUnlocked();
+          }
+        });
+      }
+
+      if (currentPlayerDied) {
+        setTimeout(() => {
+          setPlayerToRevive(turn);
+          setShowReviveModal(true);
+        }, 1000);
+      } else {
+        setTimeout(() => {
+          switchTurn({ p1: nextP1Score, p2: nextP2Score });
+        }, 1500);
+      }
+  }
+
+  if (isSetup) {
+    return (
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.setupContainer}
+      >
+        <Text style={styles.setupTitle}>{t(language, "vsModeTitle")}</Text>
+        <Text style={styles.setupSubtitle}>{t(language, "vsSubtitle")}</Text>
+
+        <View style={styles.infoBadge}>
+          <Text style={styles.infoText}>{t(language, "vsInfo")}</Text>
+        </View>
+
+        <View style={styles.inputCard}>
+          <Text style={styles.inputLabel}>{t(language, "p1NameLabel")}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder={t(language, "nameExample")}
+            placeholderTextColor="#64748b"
+            value={p1Name}
+            onChangeText={setP1Name}
+          />
+        </View>
+
+        <View style={styles.inputCard}>
+          <Text style={styles.inputLabel}>{t(language, "p2NameLabel")}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder={t(language, "nameExample")}
+            placeholderTextColor="#64748b"
+            value={p2Name}
+            onChangeText={setP2Name}
+          />
+        </View>
+
+        <TouchableOpacity style={styles.startBtn} onPress={handleStartGame}>
+          <Text style={styles.startBtnText}>{t(language, "startRandom")}</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleExitMatch} style={{ marginTop: 20 }}>
+          <Text style={styles.cancelText}>{t(language, "cancel")}</Text>
+        </TouchableOpacity>
+      </KeyboardAvoidingView>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.accent} />
+      </View>
+    );
+  }
+
+  const questionsPerPlayer = 7;
+  const currentRound = Math.floor(current / 2) + 1;
+  const progressText = `${t(language, "round")}: ${currentRound} / ${questionsPerPlayer}`;
+  const currentQuestion = questions[current] || {};
+  const seriesScoreText = `${p1Wins}-${p2Wins}`;
