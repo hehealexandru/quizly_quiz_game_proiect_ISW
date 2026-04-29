@@ -382,3 +382,156 @@ function VersusScreen({ onExit, language, onAchievementsUnlocked }) {
   const progressText = `${t(language, "round")}: ${currentRound} / ${questionsPerPlayer}`;
   const currentQuestion = questions[current] || {};
   const seriesScoreText = `${p1Wins}-${p2Wins}`;
+
+  // Zona unui jucator se roteste sus si ramane normala jos.
+  const PlayerZone = ({ playerNum, name, score, lives, isActive, rotated }) => {
+    const themeColor =
+      playerNum === 1 ? theme.colors.accent : theme.colors.danger;
+    const backgroundColor = isActive
+      ? theme.colors.surfaceStrong
+      : theme.colors.surface;
+
+    return (
+      <View
+        style={[
+          styles.playerZone,
+          rotated && styles.rotatedZone,
+          {
+            backgroundColor,
+            borderColor: isActive ? themeColor : "transparent",
+          },
+        ]}
+      >
+        <View style={styles.playerHeader}>
+          <View>
+            <Text style={[styles.pLabel, { color: themeColor }]}>{name}</Text>
+            <Text style={styles.pLives}>{Array(lives).fill("❤️").join(" ")}</Text>
+          </View>
+          <Text style={[styles.pScore, { color: themeColor }]}>{score}</Text>
+        </View>
+
+        {isActive ? (
+          <View style={styles.quizContent}>
+            <Text style={styles.questionText}>{currentQuestion.question}</Text>
+            <View style={styles.answersGrid}>
+              {currentQuestion.answers?.map((answer, index) => {
+                const isCorrect = answer === currentQuestion.correct;
+                const isSelected = answer === selected;
+                const buttonStyle = [styles.answerBtn];
+
+                if (answered) {
+                  if (isCorrect) buttonStyle.push({ backgroundColor: theme.colors.success });
+                  else if (isSelected) {
+                    buttonStyle.push({ backgroundColor: theme.colors.danger });
+                  }
+                }
+
+                return (
+                  <TouchableOpacity
+                    key={index}
+                    style={buttonStyle}
+                    disabled={answered}
+                    onPress={() => handleAnswer(answer)}
+                  >
+                    <Text style={styles.answerText}>{answer}</Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        ) : (
+          <View style={styles.waitingContainer}>
+            <Text style={[styles.waitingText, { color: themeColor }]}>
+              {name} {t(language, "waiting")}
+            </Text>
+          </View>
+        )}
+
+        <Text style={styles.progressText}>{progressText}</Text>
+      </View>
+    );
+  };
+
+  return (
+    <View style={styles.container}>
+      <View style={styles.halfScreen}>
+        <PlayerZone
+          playerNum={2}
+          name={p2Name}
+          score={p2Score}
+          lives={p2Lives}
+          isActive={turn === 2}
+          rotated
+        />
+      </View>
+
+      <View style={styles.centerDivider}>
+        <Text style={styles.seriesLabel}>{t(language, "seriesScore")}</Text>
+        <Text style={styles.seriesScore}>{seriesScoreText}</Text>
+        <TouchableOpacity onPress={handleExitMatch} style={styles.smallExitBtn}>
+          <Text style={styles.smallExitText}>{t(language, "quit")}</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.halfScreen}>
+        <PlayerZone
+          playerNum={1}
+          name={p1Name}
+          score={p1Score}
+          lives={p1Lives}
+          isActive={turn === 1}
+          rotated={false}
+        />
+      </View>
+
+      <Modal visible={showReviveModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View
+            style={[
+              styles.modalContent,
+              playerToRevive === 2 && { transform: [{ rotate: "180deg" }] },
+            ]}
+          >
+            <Text style={styles.modalTitle}>{t(language, "eliminatedTitle")}</Text>
+            <Text style={styles.modalText}>
+              {playerToRevive === 1 ? p1Name : p2Name} {t(language, "eliminatedText")}
+            </Text>
+            <TouchableOpacity
+              style={styles.primaryActionBtn}
+              onPress={handleContinueRevive}
+            >
+              <Text style={styles.primaryActionBtnText}>
+                {t(language, "reviveBtnVs")}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.giveUpBtn} onPress={handleRefuseRevive}>
+              <Text style={styles.giveUpText}>{t(language, "endGame")}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal visible={showGameOverModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={[styles.modalTitle, styles.gameOverTitle]}>
+              {t(language, "finalScoreTitle")}
+            </Text>
+            <Text style={[styles.modalText, styles.gameOverText]}>
+              {gameOverMessage}
+            </Text>
+            <TouchableOpacity style={styles.primaryActionBtn} onPress={startNewMatch}>
+              <Text style={styles.primaryActionBtnText}>{t(language, "playAgain")}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.secondaryActionBtn}
+              onPress={handleExitMatch}
+            >
+              <Text style={styles.secondaryActionBtnText}>{t(language, "exit")}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </View>
+  );
+}
