@@ -98,3 +98,43 @@ export default function App() {
     setGameStarted(true);
   }
 
+  // Inchide jocul, retine rezultatul si salveaza high score-ul corect.
+  async function handleGameEnd(result) {
+    setGameStarted(false);
+    setLastResult(result);
+
+    try {
+      const key = getHighScoreKey({
+        mode: result?.mode,
+        category: result?.category,
+        difficulty: result?.difficulty,
+      });
+      const savedScore = await AsyncStorage.getItem(key);
+      const currentHighScore = savedScore ? parseInt(savedScore, 10) : 0;
+
+      if (result.score > currentHighScore) {
+        await AsyncStorage.setItem(key, result.score.toString());
+      }
+    } catch (_error) {
+    }
+  }
+
+  // Revine din ecranul de rezultat la meniul principal.
+  function handleBackFromResult() {
+    setLastResult(null);
+  }
+
+  // Porneste modul local 1 vs 1.
+  function handleStartVersus(diff, cat, lang) {
+    setGameStarted(false);
+    setLastResult(null);
+    setDifficulty(diff);
+    setCategory(cat);
+    setLanguage(lang);
+    setVersusStarted(true);
+    setShowAchievements(false);
+    setShowMastery(false);
+    setShowGameSelect(false);
+    setGameMode("versus");
+  }
+
