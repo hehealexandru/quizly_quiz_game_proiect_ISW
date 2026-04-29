@@ -142,3 +142,204 @@ export default function App() {
   function handleExitVersus() {
     setVersusStarted(false);
   }
+
+  // Deschide pagina de realizari si marcheaza ce a fost vazut.
+  function handleOpenAchievements() {
+    setGameStarted(false);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowGameSelect(false);
+    setShowAchievements(true);
+    setShowMastery(false);
+    markAchievementsViewed().then((data) => {
+      setHasNewAchievements(hasNewUnlocks(data));
+    });
+  }
+
+  // Inchide pagina de realizari.
+  function handleCloseAchievements() {
+    setShowAchievements(false);
+  }
+
+  // Deschide pagina de mastery pe categorii.
+  function handleOpenMastery() {
+    setGameStarted(false);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowGameSelect(false);
+    setShowAchievements(false);
+    setShowMastery(true);
+  }
+
+  // Inchide pagina de mastery.
+  function handleCloseMastery() {
+    setShowMastery(false);
+  }
+
+  // Deschide selectorul de moduri si setari de joc.
+  function handleOpenGameSelect() {
+    setGameStarted(false);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowAchievements(false);
+    setShowMastery(false);
+    setShowGameSelect(true);
+  }
+
+  // Inchide selectorul de joc.
+  function handleCloseGameSelect() {
+    setShowGameSelect(false);
+  }
+
+  // Forteaza refresh pentru badge-ul de realizari.
+  function handleAchievementsUnlocked() {
+    setAchievementsRefreshKey((x) => x + 1);
+  }
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.fontLoading}>
+        <ActivityIndicator size="large" color="#22d3ee" />
+      </View>
+    );
+  }
+
+  return (
+    <ImageBackground
+      source={backgroundImg}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <View style={styles.backdrop} />
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.appContainer}>
+            <View style={styles.mainContent}>
+              {showMastery ? (
+                <CategoryMasteryScreen
+                  language={language}
+                  onClose={handleCloseMastery}
+                />
+              ) : showGameSelect ? (
+                <GameSelectScreen
+                  language={language}
+                  onClose={handleCloseGameSelect}
+                  onStartSingle={handleStart}
+                  onStartVersus={handleStartVersus}
+                  difficulty={difficulty}
+                  setDifficulty={setDifficulty}
+                  category={category}
+                  setCategory={setCategory}
+                  playerName={playerName}
+                  setPlayerName={setPlayerName}
+                />
+              ) : showAchievements ? (
+                <AchievementsScreen
+                  language={language}
+                  onClose={handleCloseAchievements}
+                  onViewed={() => setAchievementsRefreshKey((x) => x + 1)}
+                />
+              ) : versusStarted ? (
+                <VersusScreen
+                  language={language}
+                  onExit={handleExitVersus}
+                  onAchievementsUnlocked={handleAchievementsUnlocked}
+                />
+              ) : (
+                <>
+                  {!gameStarted && !lastResult && (
+                    <StartScreen
+                      onOpenGameSelect={handleOpenGameSelect}
+                      onOpenAchievements={handleOpenAchievements}
+                      onOpenMastery={handleOpenMastery}
+                      language={language}
+                      setLanguage={setLanguage}
+                      hasNewAchievements={hasNewAchievements}
+                    />
+                  )}
+
+                  {gameStarted && (
+                    <QuizScreen
+                      playerName={playerName}
+                      difficulty={difficulty}
+                      language={language}
+                      category={category}
+                      gameMode={gameMode}
+                      onGameEnd={handleGameEnd}
+                      onAchievementsUnlocked={handleAchievementsUnlocked}
+                    />
+                  )}
+
+                  {!gameStarted && lastResult && (
+                    <ResultScreen
+                      playerName={playerName}
+                      result={lastResult}
+                      language={language}
+                      onBack={handleBackFromResult}
+                    />
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
+  );
+}
+
+// Stilurile de baza pentru layout-ul aplicatiei.
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  appContainer: {
+    flex: 1,
+    backgroundColor: "rgba(7, 11, 20, 0.65)",
+    paddingBottom: 24,
+  },
+  mainContent: {
+    padding: 16,
+    flex: 1,
+    justifyContent: "center",
+  },
+  fontLoading: {
+    flex: 1,
+    backgroundColor: "rgba(7, 11, 20, 1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(7, 11, 20, 0.75)",
+  },
+  glowTop: {
+    position: "absolute",
+    top: -120,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: "rgba(34, 211, 238, 0.22)",
+  },
+  glowBottom: {
+    position: "absolute",
+    bottom: -140,
+    left: -90,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: "rgba(251, 191, 36, 0.16)",
+  },
+});
