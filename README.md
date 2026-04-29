@@ -38,6 +38,11 @@ O aplicație mobilă de quiz de cultură generală, construită cu React Native 
   <img src="screenshots/rulare_joc.jpeg" width="180" alt="Rulare Joc"/>
   <img src="screenshots/achievements.jpeg" width="180" alt="Achievements"/>
   <img src="screenshots/domeniu.jpeg" width="180" alt="Level"/>
+  <img src="screenshots/joc_terminat_1_player.jpeg" width="180" alt="1 Player"/>
+  <img src="screenshots/rezultat.jpeg" width="180" alt="Rezultat"/>
+  <img src="screenshots/setari.jpeg" width="180" alt="Setari"/>
+  <img src="screenshots/1v1.jpeg" width="180" alt="1v1"/>
+  
 </p>
 
 ## Pornire Rapidă
