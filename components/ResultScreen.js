@@ -101,3 +101,110 @@ function ResultScreen({ playerName, result, language, onBack }) {
 }
 
 export default ResultScreen;
+          
+// Stilurile pentru cardul de rezultat.
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 16,
+  },
+  card: {
+    width: "90%",
+    backgroundColor: theme.colors.surface,
+    borderRadius: theme.radius.xl,
+    paddingVertical: 24,
+    paddingHorizontal: 18,
+    shadowColor: "#000",
+    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: 8 },
+    shadowRadius: 20,
+    elevation: 10,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "800",
+    color: theme.colors.text,
+    fontFamily: theme.fonts.title,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: theme.colors.textMuted,
+    textAlign: "center",
+    marginBottom: 18,
+  },
+  playerName: {
+    fontWeight: "800",
+    color: theme.colors.accent,
+  },
+  scoreBox: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  scoreLabel: {
+    fontSize: 13,
+    color: theme.colors.textFaint,
+  },
+  scoreValue: {
+    fontSize: 26,
+    fontWeight: "800",
+    color: theme.colors.gold,
+    marginTop: 6,
+    textAlign: "center",
+    width: "100%",
+    flexShrink: 1,
+    fontVariant: ["tabular-nums"],
+    letterSpacing: 0.3,
+    fontFamily: theme.fonts.mono,
+  },
+  rankBox: {
+    marginBottom: 18,
+    alignItems: "center",
+    paddingHorizontal: 8,
+  },
+  rankLabel: {
+    fontSize: 13,
+    color: theme.colors.textFaint,
+    marginBottom: 4,
+  },
+  rankTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: theme.colors.accent,
+    textAlign: "center",
+    marginBottom: 4,
+  },
+  rankDescription: {
+    fontSize: 13,
+    color: theme.colors.textMuted,
+    textAlign: "center",
+  },
+  meta: {
+    fontSize: 12,
+    color: theme.colors.textFaint,
+    textAlign: "center",
+    marginBottom: 22,
+  },
+  metaStrong: {
+    color: theme.colors.text,
+    fontWeight: "600",
+  },
+  backButton: {
+    alignSelf: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: theme.radius.pill,
+    backgroundColor: theme.colors.accent,
+  },
+  backButtonText: {
+    color: theme.colors.bgDeep,
+    fontWeight: "700",
+    fontSize: 16,
+  },
+});
+
