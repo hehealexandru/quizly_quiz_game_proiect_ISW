@@ -295,4 +295,52 @@ export default function App() {
   );
 }
 
+// Stilurile de baza pentru layout-ul aplicatiei.
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent",
+  },
+  scrollContent: {
+    flexGrow: 1,
+  },
+  appContainer: {
+    flex: 1,
+    backgroundColor: "rgba(7, 11, 20, 0.65)",
+    paddingBottom: 24,
+  },
+  mainContent: {
+    padding: 16,
+    flex: 1,
+    justifyContent: "center",
+  },
+  fontLoading: {
+    flex: 1,
+    backgroundColor: "rgba(7, 11, 20, 1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backdrop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(7, 11, 20, 0.75)",
+  },
+  glowTop: {
+    position: "absolute",
+    top: -120,
+    right: -80,
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: "rgba(34, 211, 238, 0.22)",
+  },
+  glowBottom: {
+    position: "absolute",
+    bottom: -140,
+    left: -90,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: "rgba(251, 191, 36, 0.16)",
+  },
+});
 
