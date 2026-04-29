@@ -95,3 +95,162 @@ function VersusScreen({ onExit, language, onAchievementsUnlocked }) {
 
     checkSoundSetting();
   }, [language]);
+
+  // Pregateste prima runda cand intri in modul versus.
+  useEffect(() => {
+    const nextRound = buildVersusRound(language);
+    setActiveCategoryId(nextRound.categoryId);
+    setQuestions(nextRound.questions);
+    setLoading(false);
+  }, [language]);
+
+  // Ruleaza efectele audio folosite in meci.
+  async function playEffect(type) {
+    if (!soundEnabled) return;
+
+    try {
+      let soundFile;
+      if (type === "correct") soundFile = require("../assets/sounds/correct.mp3");
+      else if (type === "wrong") soundFile = require("../assets/sounds/wrong.mp3");
+      else if (type === "win") soundFile = require("../assets/sounds/win.mp3");
+
+      const { sound } = await Audio.Sound.createAsync(soundFile);
+      await sound.playAsync();
+    } catch (_error) {
+    }
+  }
+
+  // Decide mesajul final pe baza scorului din runda.
+  function getWinnerMessage(scoreOne = p1Score, scoreTwo = p2Score) {
+    if (scoreOne > scoreTwo) return `${p1Name} ${t(language, "wins")}`;
+    if (scoreTwo > scoreOne) return `${p2Name} ${t(language, "wins")}`;
+    return t(language, "tie");
+  }
+
+  // Deschide modalul final cu scorul rundei si scorul seriei.
+  function openGameOverModal({
+    winnerMessage,
+    scoreOne = p1Score,
+    scoreTwo = p2Score,
+    winsOne = p1Wins,
+    winsTwo = p2Wins,
+  } = {}) {
+    setGameOverMessage(
+      `${p1Name}: ${scoreOne}\n${p2Name}: ${scoreTwo}\n\n${
+        winnerMessage || getWinnerMessage(scoreOne, scoreTwo)
+      }\n\n${t(language, "seriesScore")}: ${winsOne}-${winsTwo}`
+    );
+    setShowGameOverModal(true);
+  }
+
+  // Reseteaza starea unei runde si, optional, toata seria.
+  function resetVersusState(resetSeries = false) {
+    setShowGameOverModal(false);
+    setGameOverMessage("");
+    setShowReviveModal(false);
+    setPlayerToRevive(null);
+    setCurrent(0);
+    setTurn(1);
+    setP1Score(0);
+    setP2Score(0);
+    setP1Lives(2);
+    setP2Lives(2);
+    setAnswered(false);
+    setSelected(null);
+    if (resetSeries) {
+      setP1Wins(0);
+      setP2Wins(0);
+    }
+  }
+
+  // Porneste o runda noua fara sa iesi din versus.
+  function startNewMatch() {
+    const nextRound = buildVersusRound(language);
+
+    setLoading(true);
+    resetVersusState();
+    setActiveCategoryId(nextRound.categoryId);
+    setQuestions(nextRound.questions);
+    setLoading(false);
+  }
+
+  // Iese din versus si curata complet scorurile seriei.
+  function handleExitMatch() {
+    resetVersusState(true);
+    onExit();
+  }
+
+  // Inchide runda curenta si actualizeaza scorul de meciuri castigate.
+  function finalizeMatch({ scoreOne = p1Score, scoreTwo = p2Score, winner = null } = {}) {
+    let nextP1Wins = p1Wins;
+    let nextP2Wins = p2Wins;
+    let winnerMessage = t(language, "tie");
+
+    if (winner === 1 || (winner === null && scoreOne > scoreTwo)) {
+      nextP1Wins += 1;
+      winnerMessage = `${p1Name} ${t(language, "wins")}`;
+    } else if (winner === 2 || (winner === null && scoreTwo > scoreOne)) {
+      nextP2Wins += 1;
+      winnerMessage = `${p2Name} ${t(language, "wins")}`;
+    } else if (winner === null) {
+      winnerMessage = getWinnerMessage(scoreOne, scoreTwo);
+    }
+
+    setP1Wins(nextP1Wins);
+    setP2Wins(nextP2Wins);
+    playEffect("win");
+    openGameOverModal({
+      winnerMessage,
+      scoreOne,
+      scoreTwo,
+      winsOne: nextP1Wins,
+      winsTwo: nextP2Wins,
+    });
+  }
+
+  // Valideaza numele si scoate ecranul de setup.
+  function handleStartGame() {
+    if (!p1Name.trim() || !p2Name.trim()) {
+      Alert.alert(
+        t(language, "namesRequiredTitle"),
+        t(language, "namesRequiredMsg")
+      );
+      return;
+    }
+
+    setIsSetup(false);
+  }
+
+  // Continua jocul dupa revive pentru jucatorul eliminat.
+  function handleContinueRevive() {
+    if (playerToRevive === 1) setP1Lives(1);
+    if (playerToRevive === 2) setP2Lives(1);
+
+    setShowReviveModal(false);
+    setPlayerToRevive(null);
+    switchTurn();
+  }
+
+  // Inchide runda daca jucatorul refuza revive-ul.
+  function handleRefuseRevive() {
+    setShowReviveModal(false);
+    setPlayerToRevive(null);
+    finalizeMatch({ winner: playerToRevive === 1 ? 2 : 1 });
+  }
+
+  // Schimba jucatorul activ sau inchide runda la final.
+  function switchTurn(nextScores = { p1: p1Score, p2: p2Score }) {
+    const next = current + 1;
+    if (next < questions.length) {
+      setCurrent(next);
+      setTurn((previous) => (previous === 1 ? 2 : 1));
+      setAnswered(false);
+      setSelected(null);
+      return;
+    }
+
+    finalizeMatch({
+      scoreOne: nextScores.p1,
+      scoreTwo: nextScores.p2,
+    });
+  }
