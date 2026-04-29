@@ -60,3 +60,41 @@ export default function App() {
     };
   }, []);
 
+  // Refoloseste ultimul nume introdus de jucator.
+  useEffect(() => {
+    async function loadLastPlayer() {
+      try {
+        const stored = await AsyncStorage.getItem("lastPlayer");
+        if (stored) setPlayerName(stored);
+      } catch (_error) {
+      }
+    }
+
+    loadLastPlayer();
+  }, []);
+
+  // Actualizeaza badge-ul cand apar realizari noi.
+  useEffect(() => {
+    async function refreshBadge() {
+      const data = await loadAchievementsData();
+      setHasNewAchievements(hasNewUnlocks(data));
+    }
+
+    refreshBadge();
+  }, [achievementsRefreshKey]);
+
+  // Porneste jocul single sau mega cu setarile alese.
+  function handleStart(name, diff, lang, cat, mode = "classic") {
+    setPlayerName(name);
+    setDifficulty(diff);
+    setCategory(cat);
+    setLanguage(lang);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowAchievements(false);
+    setShowMastery(false);
+    setShowGameSelect(false);
+    setGameMode(mode);
+    setGameStarted(true);
+  }
+
