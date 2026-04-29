@@ -138,3 +138,51 @@ export default function App() {
     setGameMode("versus");
   }
 
+  // Inchide modul versus si revine la meniul normal.
+  function handleExitVersus() {
+    setVersusStarted(false);
+  }
+
+  // Deschide pagina de realizari si marcheaza ce a fost vazut.
+  function handleOpenAchievements() {
+    setGameStarted(false);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowGameSelect(false);
+    setShowAchievements(true);
+    setShowMastery(false);
+    markAchievementsViewed().then((data) => {
+      setHasNewAchievements(hasNewUnlocks(data));
+    });
+  }
+
+  // Inchide pagina de realizari.
+  function handleCloseAchievements() {
+    setShowAchievements(false);
+  }
+
+  // Deschide pagina de mastery pe categorii.
+  function handleOpenMastery() {
+    setGameStarted(false);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowGameSelect(false);
+    setShowAchievements(false);
+    setShowMastery(true);
+  }
+
+  // Inchide pagina de mastery.
+  function handleCloseMastery() {
+    setShowMastery(false);
+  }
+
+  // Deschide selectorul de moduri si setari de joc.
+  function handleOpenGameSelect() {
+    setGameStarted(false);
+    setLastResult(null);
+    setVersusStarted(false);
+    setShowAchievements(false);
+    setShowMastery(false);
+    setShowGameSelect(true);
+  }
+
