@@ -185,4 +185,114 @@ export default function App() {
     setShowMastery(false);
     setShowGameSelect(true);
   }
+  
+  // Inchide selectorul de joc.
+  function handleCloseGameSelect() {
+    setShowGameSelect(false);
+  }
+
+  // Forteaza refresh pentru badge-ul de realizari.
+  function handleAchievementsUnlocked() {
+    setAchievementsRefreshKey((x) => x + 1);
+  }
+
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.fontLoading}>
+        <ActivityIndicator size="large" color="#22d3ee" />
+      </View>
+    );
+  }
+
+  return (
+    <ImageBackground
+      source={backgroundImg}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
+      <View style={styles.backdrop} />
+      <View style={styles.glowTop} />
+      <View style={styles.glowBottom} />
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="light-content" />
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.appContainer}>
+            <View style={styles.mainContent}>
+              {showMastery ? (
+                <CategoryMasteryScreen
+                  language={language}
+                  onClose={handleCloseMastery}
+                />
+              ) : showGameSelect ? (
+                <GameSelectScreen
+                  language={language}
+                  onClose={handleCloseGameSelect}
+                  onStartSingle={handleStart}
+                  onStartVersus={handleStartVersus}
+                  difficulty={difficulty}
+                  setDifficulty={setDifficulty}
+                  category={category}
+                  setCategory={setCategory}
+                  playerName={playerName}
+                  setPlayerName={setPlayerName}
+                />
+              ) : showAchievements ? (
+                <AchievementsScreen
+                  language={language}
+                  onClose={handleCloseAchievements}
+                  onViewed={() => setAchievementsRefreshKey((x) => x + 1)}
+                />
+              ) : versusStarted ? (
+                <VersusScreen
+                  language={language}
+                  onExit={handleExitVersus}
+                  onAchievementsUnlocked={handleAchievementsUnlocked}
+                />
+              ) : (
+                <>
+                  {!gameStarted && !lastResult && (
+                    <StartScreen
+                      onOpenGameSelect={handleOpenGameSelect}
+                      onOpenAchievements={handleOpenAchievements}
+                      onOpenMastery={handleOpenMastery}
+                      language={language}
+                      setLanguage={setLanguage}
+                      hasNewAchievements={hasNewAchievements}
+                    />
+                  )}
+
+                  {gameStarted && (
+                    <QuizScreen
+                      playerName={playerName}
+                      difficulty={difficulty}
+                      language={language}
+                      category={category}
+                      gameMode={gameMode}
+                      onGameEnd={handleGameEnd}
+                      onAchievementsUnlocked={handleAchievementsUnlocked}
+                    />
+                  )}
+
+                  {!gameStarted && lastResult && (
+                    <ResultScreen
+                      playerName={playerName}
+                      result={lastResult}
+                      language={language}
+                      onBack={handleBackFromResult}
+                    />
+                  )}
+                </>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
+  );
+}
+
 
